@@ -107,4 +107,3 @@ pip install Flask flask_sqlalchemy flask_login Werkzeug flask-wtf
 
 ### 9. Остановика сервер (при завершении)
 - В терминале нажмите **Ctrl + C**.  
-# SpeakPeak
