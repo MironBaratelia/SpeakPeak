@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeakPeak</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/menu.css">
+    <link rel="stylesheet" href="../static/css/home.css">
+    <link rel="stylesheet" href="../static/css/forms.css">
+    <link rel="icon" type="image/png" href="../static/images/logo.png">
+</head>
+<body>
+    {% include "partials/menu.html" %}
+    <div class="main-content">
+        <h2>Регистрация</h2>
+
+        <!-- Блок для flash-сообщений -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div>
+                {{ form.first_name(placeholder="Имя") }}
+            </div>
+            <div>
+                {{ form.last_name(placeholder="Фамилия") }}
+            </div>
+            <div>
+                {{ form.login(placeholder="Логин") }}
+            </div>
+            <div>
+                {{ form.password(placeholder="Пароль") }}
+            </div>
+            <div>
+                {{ form.confirm_password(placeholder="Подтвердите пароль") }}
+            </div>
+            <div>
+                {{ form.submit() }}
+            </div>
+        </form>
+
+        <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войдите</a></p>
+    </div>
+</body>
+</html>

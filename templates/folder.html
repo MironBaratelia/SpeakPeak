@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeakPeak - {{ folder.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/buttons.css">
+    <link rel="stylesheet" href="../static/css/menu.css">
+    <link rel="stylesheet" href="../static/css/folder.css">
+    <link rel="icon" type="image/png" href="../static/images/logo.png">
+</head>
+<body>
+    {% include "partials/menu.html" %}
+    <div class="main-content" id="folder-page">
+        <h1>{{ folder.name }}</h1>
+
+        <div class="students-info__error-list__wrap">
+            <div class="students-info__error-list__element">
+                {% for date in sorted_dates %}
+                    <div class="date-group">
+                        <p class="students-info__error-list__title">{{ date }}</p>
+                        <div class="students-info__error-list">
+                            {% for record in records_by_date[date] %}
+                                <div class="record-item">
+                                    <a href="/playback/{{ record.id }}" class="record-link ">
+                                        <label class="comment-input__wrap button">
+                                            <span class="record-name">{{ record.name }}</span>
+                                            <svg class="comment-input__icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                 viewBox="0 0 18 18" fill="none">
+                                                <path d="M8 4L12 9L8 14" stroke="#DDDDDD" stroke-width="2"/>
+                                            </svg>
+                                        </label>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Функция для удаления записи
+        function deleteRecord(recordId) {
+            if (confirm("Вы уверены, что хотите удалить эту запись?")) {
+                fetch(`/delete_record/${recordId}`, {
+                    method: 'DELETE',
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload(); // Перезагрузить страницу после удаления
+                    } else {
+                        alert("Ошибка при удалении записи.");
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

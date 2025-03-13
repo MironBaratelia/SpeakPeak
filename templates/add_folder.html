@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeakPeak - Новая папка</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/buttons.css">
+    <link rel="stylesheet" href="../static/css/menu.css">
+    <link rel="stylesheet" href="../static/css/forms.css">
+    <link rel="icon" type="image/png" href="../static/images/logo.png">
+</head>
+<body>
+    {% include "partials/menu.html" %}
+    <div class="main-content" id="add-folder-page">
+        <h1>Новая папка</h1> <!-- Заголовок -->
+
+        <form action="{{ url_for('create_folder') }}" method="POST">
+            <div class="input-group">
+                <input type="text" name="folder_name" placeholder="Название папки" required>
+            </div>
+            <button type="submit" class="create-button">Создать</button>
+        </form>
+    </div>
+</body>
+</html>

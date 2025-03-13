@@ -1,0 +1,24 @@
+:root {
+    --background-color: #ffffff;
+    --blue-1: #0948BF;
+    --blue-2: #75A4FC;
+    --blue-3: #D6E4FE;
+
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--background-color);
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}

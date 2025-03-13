@@ -1,0 +1,81 @@
+<div class="sidebar">
+    <a href="{{ url_for('index') }}"><h1>SpeakPeak</h1></a>
+    <div class="avatar">
+        <div class="avatar-silhouette">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4Z"/>
+            </svg>
+        </div>
+        <div class="username">
+            {% if current_user.is_authenticated %}
+                {{ current_user.first_name }} {{ current_user.last_name }}
+            {% else %}
+                {% if not login %}
+                    <a href="{{ url_for('login') }}">Войти</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% if not current_user.is_authenticated %}
+        <p><b>Добро пожаловать в SpeakPeak!</b> <hr> <nav style="color: gray;"> Здесь вы сможете записывать речь своих учеников, а затем помогать им исправлять ошибки и улучшать свои навыки общения. Совместно мы сможем достичь новых высот в изучении языка.</nav></p>
+    {% else %}
+        {% set ns = namespace(drafts_folder=None, trash_folder=None) %}
+
+        {% for folder in current_user.folders %}
+            {% if folder.name == 'Черновики' %}
+                {% set ns.drafts_folder = folder %}
+            {% endif %}
+            {% if folder.name == 'Корзина' %}
+                {% set ns.trash_folder = folder %}
+            {% endif %}
+        {% endfor %}
+
+        {% set drafts_folder = ns.drafts_folder %}
+        {% set trash_folder = ns.trash_folder %}
+
+        <ul class="menu">
+            <li>
+                {% if drafts_folder %}
+                    <a href="{{ url_for('folder', folder_id=drafts_folder.id) }}"><i class="fa-regular fa-file-lines"></i>Черновики</a>
+                {% else %}
+                    <a href=""><i class="fa-regular fa-file-lines"></i>Черновики</a>
+                {% endif %}
+            </li>
+
+            <li>
+                <a><i class="fa-regular fa-folder"></i>Папки</a>
+                <ul class="sub-menu">
+                    {% for folder in current_user.folders %}
+                        {% if folder.name != 'Черновики' and folder.name != 'Корзина' %}
+                            <li>
+                                <a href="{{ url_for('folder', folder_id=folder.id) }}">
+                                    <div class="mini-avatar">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                            <path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4Z"/>
+                                        </svg>
+                                    </div>
+                                    {{ folder.name }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    <li><a href="{{ url_for('create_folder') }}"><i class="fa-regular fa-plus"></i>Добавить папку</a></li>
+                </ul>
+            </li>
+            <li>
+                {% if trash_folder %}
+                    <a href="{{ url_for('folder', folder_id=trash_folder.id) }}"><i class="fa-regular fa-trash-can"></i>Корзина</a>
+                {% else %}
+                    <a href=""><i class="fa-regular fa-trash-can"></i>Корзина</a>
+                {% endif %}
+            </li>
+        </ul>
+
+        <div class="settings">
+            <ul class="menu">
+                <li><a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i>Настройки</a></li>
+            </ul>
+        </div>
+    {% endif %}
+</div>

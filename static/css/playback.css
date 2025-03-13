@@ -1,0 +1,212 @@
+.main-content {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+}
+
+.main-content h1 {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    margin: 0 0 20px 20px;
+}
+
+.player-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+#controls {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+}
+
+#recording-timer, #playback-timer {
+    font-family: Helvetica, sans-serif;
+    font-weight: lighter;
+    text-align: center;
+    font-size: 50px;
+    margin-bottom: 20px;
+    margin-top: 100px;
+}
+
+#recording-visualizer, #playback-visualizer {
+    width: 600px;
+    height: 150px;
+    position: relative;
+    margin: 20px 0;
+}
+
+.bar {
+    width: 5px;
+    background: #888;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: height 0.1s;
+    right: 0;
+    border-radius: 2.5px;
+    margin-right: 5px;
+}
+
+#center-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: #888;
+    transform: translateY(-50%);
+}
+
+.marker, .error-marker {
+    width: 12px;
+    height: 12px;
+    background: #444;
+    position: absolute;
+    border-radius: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
+.marker {
+    border: #fff solid 3px;
+}
+
+.error-marker {
+    background: #ff0000;
+    z-index: 2;
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+    pointer-events: none;
+    transition: opacity 0.5s, transform 0.5s;
+}
+
+/* Кнопки */
+#controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+#controls button {
+    width: 300px;
+    height: 50px;
+}
+
+.checkpoints-header {
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+.checkpoint-item {
+    position: relative;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 7px;
+    cursor: pointer;
+    width: 600px;
+}
+
+.checkpoint-time {
+    font-weight: bold;
+    display: block;
+}
+
+.checkpoint-comment {
+    color: #666;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
+.checkpoint-actions {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.checkpoint-action {
+    color: #666;
+    background-color: #f0f0f0;
+    padding: 6px;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-checkpoint {
+    color: #bf0909;
+    background-color: #FFDCDC;
+}
+
+.edit-checkpoint {
+    color: #0066cc;
+    background-color: #e6f0ff;
+}
+
+.delete-checkpoint:hover {
+    background-color: #ffb5b5;
+}
+
+.edit-checkpoint:hover {
+    background-color: #cce0ff;
+}
+
+.checkpoint-edit-form {
+    margin-top: 8px;
+}
+
+.checkpoint-edit-form textarea {
+    width: calc(100% - 20px);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.checkpoint-edit-form .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.checkpoint-edit-form button {
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-comment {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.cancel-edit {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+}
+
+.bar {
+    transition: transform 0.1s linear;
+    will-change: transform;
+}

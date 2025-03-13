@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeakPeak - Воспроизведение</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/buttons.css">
+    <link rel="stylesheet" href="../static/css/menu.css">
+    <link rel="stylesheet" href="../static/css/playback.css">
+    <link rel="icon" type="image/png" href="../static/images/logo.png">
+</head>
+<body>
+    {% include "partials/menu.html" %}
+    
+    <div class="main-content" id="playback-page">
+        <h1>Воспроизведение</h1>
+        <div id="playback-timer">00:00 / 00:00</div>
+
+        <div class="player-section">
+            <div id="playback-visualizer">
+                <div id="center-line"></div>
+                <div class="marker" id="playback-marker"></div>
+            </div>
+            <div id="checkpoints-container">
+                <div class="checkpoints-header">
+                    <span>Отметки ошибок</span>
+                </div>
+                <div id="checkpoints-list"></div>
+            </div>
+        </div>
+
+        <div id="controls">
+            <button class="orange-button" id="play-pause" disabled>Воспроизвести</button>
+            {% if is_owner %}
+            <button class="red-button" id="error-btn" disabled>Ошибка</button>
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        // Передаем информацию о владельце в JavaScript
+        window.isOwner = {{ 'true' if is_owner else 'false' }};
+    </script>
+    <script src="../static/js/audio.js"></script>
+</body>
+</html>

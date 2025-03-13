@@ -1,0 +1,105 @@
+.sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    text-decoration: none;
+}
+
+.sidebar h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #2c3e50;
+}
+.avatar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+    object-fit: cover;
+}
+.avatar .username {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #2c3e50;
+}
+.menu {
+    list-style-type: none;
+    padding: 0;
+    flex-grow: 1;
+}
+.menu li {
+    margin: 7px 0;
+}
+.menu li a {
+    text-decoration: none;
+    color: #666;
+    display: block;
+    padding: 8px 8px;
+    display: flex;
+    align-items: center;
+}
+.menu li a:hover {
+    background-color: #f0f0f5;
+    border-radius: 4px;
+}
+.menu li i {
+    margin-right: 10px;
+    color: #000;
+    width: 24px;
+    text-align: center;
+}
+.sub-menu {
+    list-style-type: none;
+    padding-left: 20px;
+    margin-top: 10px;
+}
+.sub-menu li {
+    margin: 5px 0;
+}
+.settings {
+    margin-top: auto;
+}
+
+/* Стили для аватарки */
+.avatar-silhouette {
+    background: #e0e0e0;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+}
+.avatar-silhouette svg {
+    width: 40px;
+    height: 40px;
+    fill: #666;
+}
+
+.mini-avatar {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    margin-right: 10px;
+}
+.mini-avatar svg {
+    width: 16px;
+    height: 16px;
+    fill: #666;
+}

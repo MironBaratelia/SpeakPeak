@@ -1,0 +1,81 @@
+/* Основные стили для формы */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 20px;
+}
+
+form {
+    width: 100%;
+    max-width: 400px;
+}
+
+form div {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+form input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    border: none;
+    background-color: #eee;
+}
+
+/* Стили для плейсхолдеров */
+form input::placeholder {
+    color: #999; /* Серый цвет плейсхолдера */
+}
+
+form input:focus {
+    border-color: var(--blue-2);
+    outline: none;
+}
+
+form input:focus::placeholder {
+    color: transparent; /* Скрываем плейсхолдер при фокусе */
+}
+
+form input[type="submit"], button {
+    background-color: var(--blue-3);
+    color: var(--blue-1);
+    width: 100%;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+form input[type="submit"]:hover, button:hover {
+    background-color: #b9cfff;
+}
+
+/* Стили для flash-сообщений */
+.alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    width: 100%;
+    text-align: center;
+    color: #c62828;
+}
+
+/* Стили для ссылки "Войти" */
+p {
+    margin-top: 15px;
+    text-align: center;
+}
+
+a {
+    color: var(--blue-1);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

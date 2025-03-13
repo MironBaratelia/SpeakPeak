@@ -1,0 +1,80 @@
+#recording-timer, #playback-timer {
+    font-family: monospace;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+#recording-visualizer, #playback-visualizer { 
+    width: 600px; 
+    height: 150px; 
+    border: 1px solid #ccc; 
+    position: relative; 
+    overflow: hidden; 
+    background: white; 
+    margin: 10px 0; 
+}
+.bar { 
+    width: 5px;
+    background: #888; 
+    position: absolute; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    transition: height 0.1s; 
+    right: 0; 
+    border-radius: 2.5px; 
+    margin-right: 5px;
+}
+#center-line { 
+    position: absolute; 
+    top: 50%; 
+    left: 0; 
+    width: 100%; 
+    height: 5px;
+    background: #888; 
+    transform: translateY(-50%); 
+}
+.marker { 
+    width: 12px; 
+    height: 12px; 
+    background: #444; 
+    position: absolute; 
+    border-radius: 50%; 
+    top: 50%; 
+    transform: translate(-50%, -50%); 
+    transition: left 0.1s linear; 
+    z-index: 1; 
+}
+.error-marker { 
+    width: 12px; 
+    height: 12px; 
+    background: #ff0000; 
+    position: absolute; 
+    border-radius: 50%; 
+    top: 50%; 
+    transform: translate(-50%, -50%); 
+    z-index: 2; 
+    box-shadow: 0 0 5px rgba(255,0,0,0.5); 
+    pointer-events: none; 
+    transition: opacity 0.5s, transform 0.5s; 
+}
+#controls { 
+    margin-top: 20px; 
+    display: flex; 
+    gap: 10px; 
+}
+button { 
+    padding: 10px 20px; 
+    font-size: 16px; 
+    cursor: pointer; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    background: white; 
+}
+#error-btn { 
+    background: #ff4444; 
+    color: white; 
+    border-color: #cc0000; 
+}
+button:disabled { 
+    opacity: 0.6; 
+    cursor: not-allowed; 
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeakPeak - Сохранение</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/menu.css">
+    <link rel="stylesheet" href="../static/css/save.css">
+    <link rel="icon" type="image/png" href="../static/images/logo.png">
+</head>
+<body>
+    {% include "partials/menu.html" %}
+    <div class="main-content">
+        <div class="save-container">
+            <h1>Сохранение записи</h1>
+            
+            <div class="input-group">
+                <label for="record-name">Название</label>
+                <input type="text" id="record-name" placeholder="Введите название записи">
+            </div>
+
+            <div class="input-group">
+                <label>Папка</label>
+                <div class="folders-container">
+                    <!-- Папки будут добавлены через JavaScript -->
+                </div>
+            </div>
+
+            <button id="save" class="save-btn">Сохранить</button>
+        </div>
+    </div>
+    <script src="../static/js/audio.js"></script>
+</body>
+</html>
