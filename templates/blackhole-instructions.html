@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Инструкция по настройке BlackHole - SpeakPeak</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/blackhole-instructions.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/menu.css">
+    <link rel="icon" type="image/png" href="../static/images/logo.png">
+</head>
+<body>
+    {% include "partials/menu.html" %}
+    
+    <div class="main-content">
+        <div class="instructions-container">
+            <h1>Настройка BlackHole для записи системного звука</h1>
+            
+            <div class="step">
+                <div class="step-title">
+                    <i class="fas fa-download"></i> Шаг 1: Скачивание и установка
+                </div>
+                <div class="step-content">
+                    <h3>Скачайте BlackHole</h3>
+                    <ol>
+                        <li>Откройте любой браузер</li>
+                        <li>Перейдите на <a href="https://existential.audio/blackhole/" target="_blank">existential.audio/blackhole</a></li>
+                        <li>Нажмите кнопку «Download BlackHole 2ch»</li>
+                    </ol>
+                    
+                    <div class="important-note">
+                        <span class="title">Если не получается скачать:</span>
+                        Используйте прямую ссылку: <a href="https://github.com/ExistentialAudio/BlackHole/releases/latest" target="_blank">GitHub</a>
+                    </div>
+                    
+                    <h3>Установите драйвер</h3>
+                    <ol>
+                        <li>Найдите BlackHole.pkg в папке «Загрузки»</li>
+                        <li>Дважды кликните по файлу и следуйте инструкциям установки</li>
+                        <li>Введите пароль от Mac когда потребуется</li>
+                    </ol>
+                    
+                    <div class="important-note">
+                        <span class="title">Важно!</span>
+                        После установки перезагрузите Mac
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">
+                    <i class="fas fa-cogs"></i> Шаг 2: Настройка многоканального устройства
+                </div>
+                <div class="step-content">
+                    <h3>Откройте Аудио MIDI-настройку</h3>
+                    <ol>
+                        <li>Нажмите <kbd>Cmd + Пробел</kbd> для вызова поиска</li>
+                        <li>Введите <strong>Аудио MIDI</strong> и нажмите Enter</li>
+                    </ol>
+                    
+                    <h3>Создайте многоканальное устройство</h3>
+                    <ol>
+                        <li>В левом нижнем углу нажмите «+» → «Создать многоканальное устройство»</li>
+                        <li>Переименуйте устройство в «Система + BlackHole»</li>
+                        <li>Отметьте галочками:
+                            <ul>
+                                <li>BlackHole 2ch</li>
+                                <li>Ваши динамики/наушники</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">
+                    <i class="fas fa-volume-up"></i> Шаг 3: Настройка системного звука
+                </div>
+                <div class="step-content">
+                    <ol>
+                        <li>Откройте Системные настройки → раздел «Звук»</li>
+                        <li>Перейдите на вкладку «Выход»</li>
+                        <li>Выберите созданное устройство «Система + BlackHole»</li>
+                    </ol>
+                    
+                    <div class="important-note">
+                        Включите любое видео или музыку и убедитесь, что звук воспроизводится в наушниках
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">
+                    <i class="fas fa-microphone"></i> Шаг 4: Запись в SpeakPeak
+                </div>
+                <div class="step-content">
+                    <ol>
+                        <li>На главном экране SpeakPeak выберите режим «Системный звук»</li>
+                        <li>Нажмите кнопку «Начать запись»</li>
+                        <li>Разрешите доступ к микрофону и BlackHole</li>
+                    </ol>
+                    
+                    <div class="important-note">
+                        Теперь весь звук с Mac будет записываться вместе с вашим голосом
+                    </div>
+                </div>
+            </div>
+            
+            <div class="troubleshooting">
+                <h3><i class="fas fa-tools"></i> Решение проблем</h3>
+                
+                <div class="problem">
+                    <div class="problem-title">Нет звука в наушниках</div>
+                    <div class="solution">
+                        <ul>
+                            <li>Проверьте, что в «Аудио MIDI-настройке» выбраны и BlackHole, и ваши наушники</li>
+                            <li>Убедитесь, что в системных настройках звука выбрано «Система + BlackHole»</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="problem">
+                    <div class="problem-title">Браузер не видит BlackHole</div>
+                    <div class="solution">
+                        <ul>
+                            <li>Перезапустите браузер</li>
+                            <li>Проверьте настройки: Системные настройки → Конфиденциальность → Микрофон</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="problem">
+                    <div class="problem-title">Запись прерывается</div>
+                    <div class="solution">
+                        <ul>
+                            <li>Закройте другие приложения, особенно видеоконференции</li>
+                            <li>Отключите функцию автоматического сна на Mac</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="back-link">
+                <a href="/" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Вернуться на главную
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

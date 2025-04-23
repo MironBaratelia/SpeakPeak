@@ -22,14 +22,63 @@
             <span></span>
             <span></span>
         </strong>
+        
+        <div class="record-mode-selector">
+            <div class="record-mode-toggle" data-mode="tab">
+                <div class="record-mode-option tab-mode active">Звук из вкладки</div>
+                <div class="record-mode-option system-mode">Системный звук</div>
+                <div class="record-mode-slider"></div>
+            </div>
+        </div>
+        
         <a href="/record" class="record-button" id="recordButton">
             <i class="fas fa-microphone"></i>
             Начать запись
             <span class="hint">Нажмите на экран или Enter</span>
         </a>
+        
+        <div class="instruction-link">
+            <a href="/blackhole-instructions">
+                <i class="fas fa-info-circle"></i> Инструкция по подключению системного звука для MacBook
+            </a>
+        </div>
     </div>
     
     <script>
+        // Сохраняем выбранный режим записи
+        const recordModeToggle = document.querySelector('.record-mode-toggle');
+        const tabModeOption = document.querySelector('.tab-mode');
+        const systemModeOption = document.querySelector('.system-mode');
+        
+        // Инициализация с сохраненным значением или по умолчанию
+        const savedMode = localStorage.getItem('recordMode') || 'tab';
+        recordModeToggle.setAttribute('data-mode', savedMode);
+        
+        if (savedMode === 'tab') {
+            tabModeOption.classList.add('active');
+            systemModeOption.classList.remove('active');
+        } else {
+            systemModeOption.classList.add('active');
+            tabModeOption.classList.remove('active');
+        }
+        
+        // Обработчик переключения режима
+        recordModeToggle.addEventListener('click', function() {
+            const currentMode = this.getAttribute('data-mode');
+            const newMode = currentMode === 'tab' ? 'system' : 'tab';
+            
+            this.setAttribute('data-mode', newMode);
+            localStorage.setItem('recordMode', newMode);
+            
+            if (newMode === 'tab') {
+                tabModeOption.classList.add('active');
+                systemModeOption.classList.remove('active');
+            } else {
+                systemModeOption.classList.add('active');
+                tabModeOption.classList.remove('active');
+            }
+        });
+        
         // Обработка нажатия клавиши Enter для начала записи
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
@@ -45,8 +94,11 @@
             
             // Добавляем обработчик клика, который перенаправляет на страницу записи
             mainContent.addEventListener('click', function(event) {
-                // Проверяем, что клик не был по самой кнопке записи (чтобы избежать двойного срабатывания)
-                if (!event.target.closest('#recordButton')) {
+                // Проверяем, что клик не был по самой кнопке записи или переключателю
+                // или по ссылке на инструкцию (чтобы избежать двойного срабатывания)
+                if (!event.target.closest('#recordButton') && 
+                    !event.target.closest('.record-mode-toggle') && 
+                    !event.target.closest('.instruction-link')) {
                     window.location.href = '/record';
                 }
             });

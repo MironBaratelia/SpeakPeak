@@ -20,7 +20,8 @@ const state = {
     currentPage: 'record',
     audioBlob: null,
     recordName: localStorage.getItem('recordName') || '',
-    selectedFolder: parseInt(localStorage.getItem('selectedFolder')) || null
+    selectedFolder: parseInt(localStorage.getItem('selectedFolder')) || null,
+    recordMode: localStorage.getItem('recordMode') || 'tab' // Добавляем режим записи
 };
 
 const elements = {
@@ -95,6 +96,114 @@ function generateDefaultName() {
     sessionStorage.setItem('todayRecordingIndex', todayIndex);
     
     return `${date} (${todayIndex})`;
+}
+
+// Функция записи через системный звук с BlackHole
+async function startSystemRecording() {
+    try {
+        // Очищаем предыдущие данные
+        audioChunks = [];
+        waveformData = [];
+        errorTimestamps = [];
+        
+        // Запрашиваем доступ к микрофону и системному звуку
+        const micStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false
+            }
+        });
+
+        // Получаем список устройств после получения разрешения на микрофон
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const blackHoleDevice = devices.find(device => 
+            device.kind === 'audioinput' && 
+            device.label.toLowerCase().includes('blackhole')
+        );
+
+        // Если нашли BlackHole, получаем его поток
+        let systemStream = null;
+        if (blackHoleDevice) {
+            systemStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    deviceId: blackHoleDevice.deviceId,
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false
+                }
+            });
+        } else {
+            // Если BlackHole не найден, показываем сообщение и предлагаем использовать запись с вкладки
+            const useTabInstead = confirm('Устройство BlackHole не найдено. Хотите использовать запись с вкладки вместо этого?');
+            
+            if (useTabInstead) {
+                // Переключаемся на режим записи с вкладки
+                localStorage.setItem('recordMode', 'tab');
+                autoStartRecording();
+            } else {
+                alert('Запись не может быть начата. Убедитесь, что BlackHole установлен и включен, или используйте запись с вкладки.');
+            }
+            return;
+        }
+
+        // Настраиваем аудио контекст
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Создаем анализаторы
+        inputAnalyser = audioContext.createAnalyser();
+        outputAnalyser = audioContext.createAnalyser();
+        
+        inputAnalyser.fftSize = 2048;
+        outputAnalyser.fftSize = 2048;
+
+        // Подключаем микрофон к inputAnalyser
+        const micSource = audioContext.createMediaStreamSource(micStream);
+        micSource.connect(inputAnalyser);
+
+        // Если есть системный звук, подключаем его к outputAnalyser
+        if (systemStream) {
+            const systemSource = audioContext.createMediaStreamSource(systemStream);
+            systemSource.connect(outputAnalyser);
+        }
+
+        // Настраиваем запись (записываем оба потока)
+        const streams = [micStream];
+        if (systemStream) streams.push(systemStream);
+        const combinedStream = new MediaStream(
+            streams.flatMap(stream => stream.getAudioTracks())
+        );
+
+        mediaRecorder = new MediaRecorder(combinedStream);
+        mediaRecorder.addEventListener('dataavailable', e => audioChunks.push(e.data));
+        mediaRecorder.addEventListener('stop', handleRecordingStop);
+
+        // Запускаем запись
+        mediaRecorder.start();
+        isRecording = true;
+        recordingStartTime = performance.now();
+        
+        // Запускаем анализ аудио
+        startAudioAnalysis();
+        
+        // Обновляем UI
+        updateRecordingTimer();
+        updateControls();
+        
+    } catch (error) {
+        console.error('Ошибка при начале записи через системный звук:', error);
+        
+        // Предлагаем переключиться на запись с вкладки
+        const useTabInstead = confirm(`Ошибка при записи через системный звук: ${error.message}. Хотите использовать запись с вкладки вместо этого?`);
+        
+        if (useTabInstead) {
+            // Переключаемся на режим записи с вкладки
+            localStorage.setItem('recordMode', 'tab');
+            autoStartRecording();
+        } else {
+            alert('Запись не может быть начата. Попробуйте еще раз или используйте другой метод записи.');
+        }
+    }
 }
 
 async function autoStartRecording() {
@@ -196,14 +305,36 @@ async function autoStartRecording() {
         updateControls();
         
     } catch (error) {
-        console.error('Ошибка доступа к аудио:', error);
-        alert('Ошибка доступа к аудио: ' + error.message);
+        console.error('Ошибка доступа к аудио вкладки:', error);
+        
+        // Если у нас был режим "tab", предложим переключиться на системный звук
+        if (state.recordMode === 'tab') {
+            const useSystemInstead = confirm(`Ошибка при записи с вкладки: ${error.message}. Хотите попробовать запись системного звука?`);
+            
+            if (useSystemInstead) {
+                // Переключаемся на режим записи системного звука
+                localStorage.setItem('recordMode', 'system');
+                startSystemRecording();
+            } else {
+                alert('Запись не может быть начата. Попробуйте еще раз или используйте другой метод записи.');
+            }
+        } else {
+            alert('Ошибка доступа к аудио: ' + error.message);
+        }
     }
 }
 
 // Запускаем автостарт сразу, если мы на странице записи
 if (window.location.pathname === '/record') {
-    autoStartRecording();
+    // Загружаем сохраненные настройки режима записи
+    state.recordMode = localStorage.getItem('recordMode') || 'tab';
+    
+    // Выбираем метод записи на основе сохраненного режима
+    if (state.recordMode === 'tab') {
+        autoStartRecording();
+    } else {
+        startSystemRecording();
+    }
 }
 
 // Инициализация
@@ -444,8 +575,16 @@ function startRecording() {
     waveformData = [];
     errorTimestamps = [];
     
-    // Call autoStartRecording to show tab selection dialog
-    autoStartRecording();
+    // Выбираем метод записи на основе сохраненного режима
+    state.recordMode = localStorage.getItem('recordMode') || 'tab';
+    
+    if (state.recordMode === 'tab') {
+        // Запись звука с вкладки браузера
+        autoStartRecording();
+    } else {
+        // Запись системного звука через BlackHole
+        startSystemRecording();
+    }
 }
 
 // Отметка ошибки

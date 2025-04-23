@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation(); // Предотвращаем всплытие события
             const folderId = this.dataset.folderId;
             const folderItem = this.closest('.folder-item');
-            const folderNameElement = folderItem.querySelector('.folder-link');
+            const folderNameElement = folderItem.querySelector('.folder-name');
             const currentName = folderNameElement.textContent.trim();
             
             // Показываем форму редактирования
@@ -23,8 +23,14 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function(e) {
             e.stopPropagation(); // Предотвращаем всплытие события
             const folderId = this.dataset.folderId;
+            const folderItem = this.closest('.folder-item');
+            const folderName = folderItem.querySelector('.folder-name').textContent.trim();
             
-            if (confirm('Вы уверены, что хотите удалить эту папку? Это действие невозможно отменить.')) {
+            // Специальное сообщение для подтверждения
+            const confirmMessage = 'Вы уверены, что хотите удалить папку "' + folderName + '"? ' +
+                                'Все записи из этой папки будут перемещены в Корзину.';
+            
+            if (confirm(confirmMessage)) {
                 deleteFolder(folderId);
             }
         });
@@ -45,11 +51,14 @@ function showEditForm(folderItem, folderNameElement, folderId, currentName) {
     `;
     
     // Скрываем имя папки
-    folderNameElement.style.display = 'none';
+    folderNameElement.parentElement.style.display = 'none';
     
     // Скрываем кнопки действий
     const actionsDiv = folderItem.querySelector('.folder-actions');
     actionsDiv.style.display = 'none';
+    
+    // Добавляем класс редактирования к элементу папки
+    folderItem.classList.add('editing');
     
     // Добавляем форму непосредственно в folder-item
     folderItem.appendChild(editForm);
@@ -70,8 +79,11 @@ function showEditForm(folderItem, folderNameElement, folderId, currentName) {
         e.preventDefault();
         e.stopPropagation();
         editForm.remove();
-        folderNameElement.style.display = '';
+        folderNameElement.parentElement.style.display = '';
         actionsDiv.style.display = '';
+        
+        // Удаляем класс редактирования
+        folderItem.classList.remove('editing');
     });
     
     // Обработчик для кнопки сохранения
@@ -88,8 +100,11 @@ function showEditForm(folderItem, folderNameElement, folderId, currentName) {
                     
                     // Восстанавливаем исходное состояние
                     editForm.remove();
-                    folderNameElement.style.display = '';
+                    folderNameElement.parentElement.style.display = '';
                     actionsDiv.style.display = '';
+                    
+                    // Удаляем класс редактирования
+                    folderItem.classList.remove('editing');
                 })
                 .catch(error => {
                     alert('Ошибка при переименовании папки: ' + error.message);
@@ -110,7 +125,7 @@ function showEditForm(folderItem, folderNameElement, folderId, currentName) {
 
 // Функция для переименования папки
 async function renameFolder(folderId, newName) {
-    const response = await fetch(`/api/folders/${folderId}`, {
+    const response = await fetch(`/api/folders/${folderId}/rename`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -141,10 +156,34 @@ async function deleteFolder(folderId) {
             throw new Error(error);
         }
         
-        // Удаляем папку из DOM
-        document.querySelector(`.folder-item[data-folder-id="${folderId}"]`).remove();
+        const result = await response.json();
+        
+        // Показываем сообщение о перемещенных файлах
+        if (result.moved_files > 0) {
+            const filesWord = getFilesWord(result.moved_files);
+            alert(`Папка успешно удалена. ${result.moved_files} ${filesWord} перемещено в Корзину.`);
+        } else {
+            alert('Папка успешно удалена.');
+        }
+        
+        // Перезагружаем страницу после успешного удаления
+        window.location.reload();
     } catch (error) {
         console.error('Ошибка при удалении папки:', error);
         alert('Ошибка при удалении папки: ' + error.message);
+    }
+}
+
+// Функция для правильного склонения слова "файл"
+function getFilesWord(count) {
+    const lastDigit = count % 10;
+    const lastTwoDigits = count % 100;
+    
+    if (lastDigit === 1 && lastTwoDigits !== 11) {
+        return 'файл';
+    } else if ([2, 3, 4].includes(lastDigit) && ![12, 13, 14].includes(lastTwoDigits)) {
+        return 'файла';
+    } else {
+        return 'файлов';
     }
 }

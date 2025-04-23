@@ -74,6 +74,11 @@ def load_user(user_id):
 def index():
     return render_template("index.html", user=current_user)
 
+# Инструкция по настройке BlackHole
+@app.route("/blackhole-instructions")
+def blackhole_instructions():
+    return render_template("blackhole-instructions.html", user=current_user)
+
 # Страница записи
 @app.route("/record")
 @login_required
@@ -247,9 +252,7 @@ def save_record():
         if not folder or folder.user_id != current_user.id:
             return jsonify({"error": "Папка не найдена или доступ запрещен"}), 404
         
-        # Проверяем правильность формата base64
         try:
-            # Убедимся, что строка правильно разделена
             if ',' in audio_base64:
                 audio_data = base64.b64decode(audio_base64.split(',')[1])
             else:
@@ -272,23 +275,21 @@ def save_record():
             app.logger.error(f"Ошибка при сохранении файла: {str(e)}")
             return jsonify({"error": f"Ошибка при сохранении файла: {str(e)}"}), 500
         
-        # Создаем запись в базе данных
         new_record = Record(
             user_id=current_user.id,
             id_folder=folder_id,
             name=record_name,
-            length=duration / 1000,  # Преобразуем миллисекунды в секунды
+            length=duration / 1000,
             audio_file=audio_filename
         )
         db.session.add(new_record)
-        db.session.flush()  # Получаем ID записи
+        db.session.flush()
         
-        # Сохраняем ошибки
         for error_time in errors:
             mistake = Mistake(
                 record_id=new_record.id,
-                time_of_mistake=error_time / 1000,  # Преобразуем миллисекунды в секунды
-                type=1  # По умолчанию тип 1, можно изменить
+                time_of_mistake=error_time / 1000,
+                type=1
             )
             db.session.add(mistake)
         
@@ -345,7 +346,6 @@ def add_error(record_id):
     try:
         record = Record.query.get_or_404(record_id)
         
-        # Проверка доступа
         if record.user_id != current_user.id:
             return jsonify({"error": "Доступ запрещен"}), 403
         
@@ -368,7 +368,6 @@ def add_error(record_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-# API для удаления ошибки
 @app.route("/api/mistakes/<int:mistake_id>", methods=["DELETE"])
 @login_required
 def delete_mistake(mistake_id):
@@ -376,7 +375,6 @@ def delete_mistake(mistake_id):
         mistake = Mistake.query.get_or_404(mistake_id)
         record = Record.query.get(mistake.record_id)
         
-        # Проверка доступа
         if record.user_id != current_user.id:
             return jsonify({"error": "Доступ запрещен"}), 403
         
@@ -459,16 +457,15 @@ def update_error_comment(record_id):
         if time is None:
             return jsonify({"error": "Время ошибки не указано"}), 400
         
-        # Ищем ошибку по времени
         mistake = Mistake.query.filter_by(
             record_id=record_id,
-            time_of_mistake=time/1000  # Конвертируем в секунды
+            time_of_mistake=time/1000
         ).first()
         
         if not mistake:
             return jsonify({"error": "Ошибка не найдена"}), 404
         
-        mistake.comment = comment  # Сохраняем пустую строку вместо None
+        mistake.comment = comment
         db.session.commit()
         
         return jsonify({"success": True})
@@ -496,13 +493,54 @@ def delete_folder(folder_id):
         if folder.user_id != current_user.id:
             return jsonify({"error": "Доступ запрещен"}), 403
         
+        if folder.name in ['Корзина', 'Черновики']:
+            return jsonify({"error": "Нельзя удалить системную папку"}), 400
+        
         if folder.records:
-            return jsonify({"error": "Невозможно удалить папку, пока в ней есть записи."}), 400
+            trash_folder = Folder.query.filter_by(user_id=current_user.id, name='Корзина').first()
+            
+            if not trash_folder:
+                trash_folder = Folder(name='Корзина', user_id=current_user.id)
+                db.session.add(trash_folder)
+                db.session.flush()
+            
+            for record in folder.records:
+                record.id_folder = trash_folder.id
+            
+            moved_files_count = len(folder.records)
+        else:
+            moved_files_count = 0
         
         db.session.delete(folder)
         db.session.commit()
         
-        return jsonify({"success": True})
+        return jsonify({
+            "success": True, 
+            "moved_files": moved_files_count
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/folders/<int:folder_id>/rename', methods=["POST"])
+@login_required
+def rename_folder(folder_id):
+    try:
+        folder = Folder.query.get_or_404(folder_id)
+        
+        if folder.user_id != current_user.id:
+            return jsonify({"error": "Доступ запрещен"}), 403
+        
+        data = request.json
+        new_name = data.get("name")
+        
+        if not new_name or not new_name.strip():
+            return jsonify({"error": "Имя папки не может быть пустым"}), 400
+        
+        folder.name = new_name.strip()
+        db.session.commit()
+        
+        return jsonify({"success": True, "name": folder.name})
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
