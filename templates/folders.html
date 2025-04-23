@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeakPeak - Все папки</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/buttons.css">
+    <link rel="stylesheet" href="../static/css/menu.css">
+    <link rel="stylesheet" href="../static/css/folders.css">
+    <link rel="icon" type="image/png" href="../static/images/logo.png">
+</head>
+<body>
+    {% include "partials/menu.html" %}
+    <div class="main-content" id="folders-page">
+        <h1>Все папки</h1>
+        <div class="folders-list">
+            {% for folder in folders %}
+                <div class="folder-item">
+                    <a href="/folder/{{ folder.id }}" class="folder-link">
+                        {% if folder.name == 'Корзина' %}
+                            <i class="fa-regular fa-trash-can"></i><span class="folder-name">{{ folder.name }}</span>
+                        {% elif folder.name == 'Черновики' %}
+                            <i class="fa-regular fa-file-lines"></i><span class="folder-name">{{ folder.name }}</span>
+                        {% else %}
+                            <i class="fa-regular fa-folder"></i><span class="folder-name">{{ folder.name }}</span>
+                        {% endif %}
+                    </a>
+                    <div class="folder-actions">
+                        {% if folder.name not in ['Черновики', 'Корзина'] %}
+                            <i class="fas fa-edit folder-action edit-folder" data-folder-id="{{ folder.id }}"></i>
+                            <i class="fas fa-trash folder-action delete-folder" data-folder-id="{{ folder.id }}"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="../static/js/folder-management.js"></script>
+</body>
+</html>

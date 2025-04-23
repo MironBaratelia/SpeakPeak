@@ -99,10 +99,14 @@ function generateDefaultName() {
 
 async function autoStartRecording() {
     try {
-        // First, get the tab audio using getDisplayMedia
+        // Change the getDisplayMedia options to allow any tab selection
         const displayStream = await navigator.mediaDevices.getDisplayMedia({ 
             audio: true,
-            video: true
+            video: {
+                height: 0,
+                width: 0,
+                displaySurface: "browser" // This allows selecting any tab
+            }
         });
         
         // We don't need the video for audio recording
@@ -307,7 +311,7 @@ function updateRecordingTimer() {
 function updatePlaybackTimer() {
     if (!audioElement || !elements.playbackTimer) return;
     const currentTime = audioElement.currentTime * 1000;
-    elements.playbackTimer.textContent = `${formatTime(currentTime)} / ${formatTime(totalDuration)}`;
+    elements.playbackTimer.innerHTML = `${formatTime(currentTime)} <span class="playback-timer-all">/ ${formatTime(totalDuration)}</span>`;
     if (!audioElement.paused) requestAnimationFrame(updatePlaybackTimer);
 }
 
@@ -470,13 +474,17 @@ function markError() {
             body: JSON.stringify({ time: currentTime })
         }).then(response => {
             if (response.ok) {
-                playbackErrorTimestamps.push(currentTime);
-                playbackErrorTimestamps.sort((a, b) => a - b);
-
-                const markerElement = createErrorMarkerElement();
-                positionErrorMarker(markerElement, currentTime);
-                addCheckpoint(currentTime, 'playback-error', currentRecordId);
+                return response.json();
             }
+            throw new Error('Failed to save error');
+        }).then(data => {
+            const mistakeId = data.mistake_id;
+            playbackErrorTimestamps.push(currentTime);
+            playbackErrorTimestamps.sort((a, b) => a - b);
+
+            const markerElement = createErrorMarkerElement();
+            positionErrorMarker(markerElement, currentTime);
+            addCheckpoint(currentTime, 'playback-error', mistakeId);
         }).catch(error => {
             console.error('Ошибка при сохранении ошибки:', error);
             alert('Ошибка при сохранении ошибки: ' + error.message);
@@ -507,42 +515,48 @@ function positionErrorMarker(element, timeOffset) {
 }
 
 // Добавление чекпоинта
-function addCheckpoint(time, type = 'playback-error', recordId, comment = '') {
+function addCheckpoint(time, type, mistakeId, comment = '') {
     const checkpoint = document.createElement('div');
     checkpoint.className = 'checkpoint-item';
     checkpoint.dataset.time = time;
-    
+    checkpoint.dataset.mistakeId = mistakeId;  // Добавляем mistake_id
+
     checkpoint.innerHTML = `
         <span class="checkpoint-time">${formatTime(time)}</span>
         ${comment ? `<div class="checkpoint-comment">${comment}</div>` : ''}
         ${isOwner ? `
             <div class="checkpoint-actions">
                 <i class="fas fa-edit checkpoint-action edit-checkpoint"></i>
-                <i class="fas fa-trash checkpoint-action delete-checkpoint"></i>
+                <i class="fas fa-trash checkpoint-action delete-checkpoint" data-mistake-id="${mistakeId}"></i>
             </div>
         ` : ''}
     `;
 
-    if (isOwner) {
-        // Обработчик удаления
-        checkpoint.querySelector('.delete-checkpoint').addEventListener('click', (e) => {
-            e.stopPropagation();
-            deleteCheckpoint(time, checkpoint, type);
-        });
-
-        // Обработчик редактирования
-        checkpoint.querySelector('.edit-checkpoint').addEventListener('click', (e) => {
-            e.stopPropagation();
-            showEditForm(checkpoint, time, type, comment);
-        });
-    }
-
+    // Обработчик клика на элемент ошибки
     checkpoint.addEventListener('click', () => {
         if (audioElement) {
-            audioElement.currentTime = time / 1000;
-            if (audioElement.paused) audioElement.play();
+            audioElement.currentTime = time / 1000;  // Переключаем воспроизведение
+            if (audioElement.paused) {
+                audioElement.play();  // Если аудио на паузе, запускаем воспроизведение
+            }
         }
     });
+
+    // Обработчик удаления
+    if (isOwner) {
+        checkpoint.querySelector('.delete-checkpoint').addEventListener('click', (e) => {
+            e.stopPropagation();  // Останавливаем всплытие события
+            const mistakeId = e.target.dataset.mistakeId;  // Получаем mistake_id
+            deleteCheckpoint(mistakeId, checkpoint);
+        });
+        
+        // Добавляем обработчик для кнопки редактирования
+        checkpoint.querySelector('.edit-checkpoint').addEventListener('click', (e) => {
+            e.stopPropagation();  // Останавливаем всплытие события
+            const currentComment = checkpoint.querySelector('.checkpoint-comment')?.textContent || '';
+            showEditForm(checkpoint, time, type, currentComment);
+        });
+    }
 
     elements.checkpointsList.appendChild(checkpoint);
     sortCheckpoints();
@@ -563,6 +577,13 @@ function showEditForm(checkpoint, time, type, currentComment = '') {
     // Заменяем действия на форму
     const actionsDiv = checkpoint.querySelector('.checkpoint-actions');
     actionsDiv.style.display = 'none';
+    
+    // Скрываем существующий комментарий, если он есть
+    const commentDiv = checkpoint.querySelector('.checkpoint-comment');
+    if (commentDiv) {
+        commentDiv.style.display = 'none';
+    }
+    
     checkpoint.appendChild(editForm);
 
     // Фокусируем на текстовом поле
@@ -575,6 +596,10 @@ function showEditForm(checkpoint, time, type, currentComment = '') {
     editForm.querySelector('.cancel-edit').addEventListener('click', () => {
         editForm.remove();
         actionsDiv.style.display = 'flex';
+        // Показываем комментарий обратно при отмене
+        if (commentDiv) {
+            commentDiv.style.display = '';
+        }
     });
 
     editForm.querySelector('.save-comment').addEventListener('click', async () => {
@@ -583,10 +608,10 @@ function showEditForm(checkpoint, time, type, currentComment = '') {
             await saveComment(currentRecordId, time, comment);
             
             // Обновляем отображение
-            const commentDiv = checkpoint.querySelector('.checkpoint-comment');
             if (comment) {
                 if (commentDiv) {
                     commentDiv.textContent = comment;
+                    commentDiv.style.display = ''; // Показываем обновленный комментарий
                 } else {
                     const newCommentDiv = document.createElement('div');
                     newCommentDiv.className = 'checkpoint-comment';
@@ -594,7 +619,7 @@ function showEditForm(checkpoint, time, type, currentComment = '') {
                     checkpoint.insertBefore(newCommentDiv, actionsDiv);
                 }
             } else if (commentDiv) {
-                commentDiv.remove();
+                commentDiv.remove(); // Если комментарий пустой, удаляем div
             }
             
             editForm.remove();
@@ -623,21 +648,38 @@ async function saveComment(recordId, time, comment) {
     return response.json();
 }
 
-// Удаление чекпоинта
-async function deleteCheckpoint(time, element, type) {
+async function deleteCheckpoint(mistakeId, element) {
     try {
-        if (type === 'recording-error') {
-            errorTimestamps = errorTimestamps.filter(t => t !== time);
-        } else {
-            playbackErrorTimestamps = playbackErrorTimestamps.filter(t => t !== time);
+        if (!mistakeId) {
+            throw new Error('ID ошибки не определен');
         }
 
+        console.log('Пытаемся удалить ошибку:', { mistakeId });
+
+        // Удаляем ошибку по mistake_id
+        const deleteResponse = await fetch(`/api/mistakes/${mistakeId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!deleteResponse.ok) {
+            const errorText = await deleteResponse.text();
+            throw new Error(`Ошибка при удалении ошибки: ${errorText}`);
+        }
+
+        // Удаляем элемент с экрана
         element.remove();
+
+        // Удаляем соответствующий маркер ошибки
+        const time = parseFloat(element.dataset.time);
         document.querySelectorAll('.error-marker').forEach(marker => {
             if (parseFloat(marker.dataset.timeOffset) === time) {
                 marker.remove();
             }
         });
+
     } catch (error) {
         console.error('Ошибка при удалении ошибки:', error);
         alert('Ошибка при удалении ошибки: ' + error.message);
@@ -842,7 +884,7 @@ async function preparePlayback(recordId) {
                 addCheckpoint(
                     error.time,
                     'recording-error',
-                    recordId,
+                    error.id,  // Use the actual mistake ID
                     error.comment
                 );
             });
@@ -850,7 +892,7 @@ async function preparePlayback(recordId) {
                 addCheckpoint(
                     error.time,
                     'playback-error',
-                    recordId,
+                    error.id,  // Use the actual mistake ID
                     error.comment
                 );
             });
@@ -883,7 +925,7 @@ async function preparePlayback(recordId) {
                 renderPlayback();
                 updateControls();
                 if (elements.playbackTimer) {
-                    elements.playbackTimer.textContent = `00:00 / ${formatTime(totalDuration)}`;
+                    elements.playbackTimer.innerHTML = `00:00 <span class="playback-timer-all">/ ${formatTime(totalDuration)}</span>`;
                 }
             });
         });

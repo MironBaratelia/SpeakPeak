@@ -1,0 +1,103 @@
+/* folders.css */
+
+.folders-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    gap: 20px; /* Match the gap in folder.css */
+    width: 100%;
+}
+
+.folder-item {
+    width: calc(100% - 30px);
+    position: relative;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    border: 1px solid #DDDDDD;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.folder-item:hover {
+    background-color: #f9f9f9;
+}
+
+.folder-link {
+    text-decoration: none;
+    color: inherit; /* Match the color style from folder.css */
+    display: block; /* Match the display style from folder.css */
+    width: 100%; /* Ensure it takes full width */
+}
+
+.folder-link i {
+    font-size: 18px;
+}
+
+.folder-name {
+    margin-left: 10px;
+}
+
+.folder-actions {
+    position: absolute; /* Match the position style from folder.css */
+    right: 10px; /* Align actions to the right */
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.folder-action {
+    color: #666;
+    background-color: #f0f0f0;
+    opacity: 0.2;
+    padding: 6px;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.folder-item:hover .folder-action {
+    opacity: 1;
+}
+
+.delete-folder {
+    color: #6f6f6f; /* Match the color style from folder.css */
+    background-color: #e7e7e7; /* Match the background style from folder.css */
+}
+
+.delete-folder:hover {
+    color: #bf0909;
+    background-color: #ffb5b5;
+}
+
+.edit-folder {
+    color: #6f6f6f; /* Match the color style from folder.css */
+    background-color: #e7e7e7; /* Match the background style from folder.css */
+}
+
+.edit-folder:hover {
+    color: #0066cc;
+    background-color: #cce0ff;
+}
+
+.comment-input {
+    border: 1px solid #DDDDDD;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 16px;
+    width: calc(100% - 50px); /* Adjust width to fit within the folder item */
+    margin-right: 10px; /* Space between input and buttons */
+}
+
+.folder-actions {
+    display: flex; /* Ensure buttons and input are in a row */
+    align-items: center; /* Center align items vertically */
+    gap: 10px; /* Space between input and buttons */
+}

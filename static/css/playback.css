@@ -11,6 +11,41 @@
     margin: 0 0 20px 20px;
 }
 
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.copy-link-btn {
+}
+.copy-link-btn:hover {
+}
+.copy-link-btn i {
+    margin-right: 5px;
+}
+.notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background-color: #ececec;
+    color: #666;
+    padding: 10px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 1000;
+    animation: fadeIn 0.3s, fadeOut 0.3s 2s forwards;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
 .player-section {
     flex: 1;
     display: flex;
@@ -37,8 +72,13 @@
     margin-top: 100px;
 }
 
+.playback-timer-all {
+    font-size: 30px;
+    color: #888;
+}
+
 #recording-visualizer, #playback-visualizer {
-    width: 600px;
+    width: 612px;
     height: 150px;
     position: relative;
     margin: 20px 0;
@@ -139,7 +179,9 @@
 
 .checkpoint-action {
     color: #666;
+    background-color: #fff;
     background-color: #f0f0f0;
+    opacity: 0.2;
     padding: 6px;
     border-radius: 50%;
     width: 24px;
@@ -151,21 +193,28 @@
     transition: all 0.3s ease;
 }
 
+.checkpoint-item:hover .checkpoint-action {
+    opacity: 1;
+    
+}
+
 .delete-checkpoint {
-    color: #bf0909;
-    background-color: #FFDCDC;
+    color: #6f6f6f;
+    background-color: #e7e7e7;
 }
 
 .edit-checkpoint {
-    color: #0066cc;
-    background-color: #e6f0ff;
+    color: #6f6f6f;
+    background-color: #e7e7e7;
 }
 
 .delete-checkpoint:hover {
+    color: #bf0909;
     background-color: #ffb5b5;
 }
 
 .edit-checkpoint:hover {
+    color: #0066cc;
     background-color: #cce0ff;
 }
 
@@ -196,14 +245,15 @@
 }
 
 .save-comment {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #E9F6DE;
+    color: #2F9825;
     border: none;
 }
 
 .cancel-edit {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
+    background-color: #e7e7e7;
+    color: #6f6f6f;
+    border: none;
 }
 
 .bar {

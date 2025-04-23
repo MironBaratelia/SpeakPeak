@@ -28,5 +28,29 @@
             <span class="hint">Нажмите на экран или Enter</span>
         </a>
     </div>
+    
+    <script>
+        // Обработка нажатия клавиши Enter для начала записи
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                // Перенаправляем на страницу записи
+                window.location.href = '/record';
+            }
+        });
+        
+        // Добавляем обработку клика на весь экран
+        document.addEventListener('DOMContentLoaded', function() {
+            // Получаем элемент main-content
+            const mainContent = document.querySelector('.main-content');
+            
+            // Добавляем обработчик клика, который перенаправляет на страницу записи
+            mainContent.addEventListener('click', function(event) {
+                // Проверяем, что клик не был по самой кнопке записи (чтобы избежать двойного срабатывания)
+                if (!event.target.closest('#recordButton')) {
+                    window.location.href = '/record';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

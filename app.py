@@ -7,19 +7,17 @@ from forms import RegistrationForm, LoginForm
 import os
 import base64
 
-# Инициализация Flask и расширений
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'd2f8a8b1c4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'static/uploads'  # Добавляем конфигурацию для папки загрузок
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
-# Создаем папку для загрузок, если она не существует
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'  # Указываем страницу входа
+login_manager.login_view = 'login'
 
 # Модель пользователя
 class User(UserMixin, db.Model):
@@ -97,6 +95,7 @@ def playback(record_id):
     return render_template("playback.html", 
                          user=current_user, 
                          record_id=record_id,
+                         record_name=record.name,
                          is_owner=is_owner)
 
 @app.route('/folder/<int:folder_id>')
@@ -300,36 +299,29 @@ def save_record():
         app.logger.error(f"Ошибка при сохранении записи: {str(e)}")
         return jsonify({"error": f"Ошибка при сохранении записи: {str(e)}"}), 500
 
-# API для получения одной записи
+
 @app.route("/api/records/<int:record_id>", methods=["GET"])
 def get_record(record_id):
     try:
         record = Record.query.get_or_404(record_id)
         
-        # Путь к аудиофайлу
         audio_path = os.path.join(app.config['UPLOAD_FOLDER'], record.audio_file)
         
-        # Проверка существования файла
         if not os.path.exists(audio_path):
             return jsonify({"error": "Аудиофайл не найден"}), 404
         
-        # Чтение аудиофайла и преобразование в base64
         with open(audio_path, "rb") as f:
             audio_data = f.read()
         
         audio_base64 = f"data:audio/wav;base64,{base64.b64encode(audio_data).decode('utf-8')}"
         
-        # Получение ошибок с комментариями
         mistakes = Mistake.query.filter_by(record_id=record_id).all()
         errors = [{
+            'id': mistake.id,
             'time': mistake.time_of_mistake * 1000,
-            'comment': mistake.comment
-        } for mistake in mistakes if mistake.type == 1]
-        
-        playback_errors = [{
-            'time': mistake.time_of_mistake * 1000,
-            'comment': mistake.comment
-        } for mistake in mistakes if mistake.type == 2]
+            'comment': mistake.comment,
+            'type': mistake.type
+        } for mistake in mistakes]
         
         record_data = {
             "id": record.id,
@@ -337,8 +329,8 @@ def get_record(record_id):
             "folder": record.id_folder,
             "audio": audio_base64,
             "duration": record.length * 1000,
-            "errors": errors,
-            "playbackErrors": playback_errors
+            "errors": [e for e in errors if e['type'] == 1],
+            "playbackErrors": [e for e in errors if e['type'] == 2]
         }
         
         return jsonify(record_data)
@@ -489,6 +481,32 @@ def update_error_comment(record_id):
 def settings():
     return render_template('settings.html', user=current_user)
 
+@app.route('/folders')
+@login_required
+def folders():
+    user_folders = Folder.query.filter_by(user_id=current_user.id).all()
+    return render_template('folders.html', user=current_user, folders=user_folders)
+
+@app.route('/api/folders/<int:folder_id>', methods=["DELETE"])
+@login_required
+def delete_folder(folder_id):
+    try:
+        folder = Folder.query.get_or_404(folder_id)
+        
+        if folder.user_id != current_user.id:
+            return jsonify({"error": "Доступ запрещен"}), 403
+        
+        if folder.records:
+            return jsonify({"error": "Невозможно удалить папку, пока в ней есть записи."}), 400
+        
+        db.session.delete(folder)
+        db.session.commit()
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/settings/profile', methods=['GET', 'POST'])
 @login_required
 def profile_settings():
@@ -540,6 +558,87 @@ def password_settings():
             flash('Ошибка при изменении пароля', 'danger')
             
     return render_template('password_settings.html', user=current_user)
+
+# API для обновления имени записи
+@app.route("/api/records/<int:record_id>/rename", methods=["POST"])
+@login_required
+def rename_record(record_id):
+    try:
+        record = Record.query.get_or_404(record_id)
+        
+        # Проверка доступа
+        if record.user_id != current_user.id:
+            return jsonify({"error": "Доступ запрещен"}), 403
+        
+        data = request.json
+        new_name = data.get("name", "").strip()
+        
+        if not new_name:
+            return jsonify({"error": "Имя записи не может быть пустым"}), 400
+        
+        record.name = new_name
+        db.session.commit()
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+# API для перемещения записи в корзину
+@app.route("/api/records/<int:record_id>/trash", methods=["POST"])
+@login_required
+def trash_record(record_id):
+    try:
+        record = Record.query.get_or_404(record_id)
+        
+        # Проверка доступа
+        if record.user_id != current_user.id:
+            return jsonify({"error": "Доступ запрещен"}), 403
+        
+        # Находим папку "Корзина"
+        trash_folder = Folder.query.filter_by(user_id=current_user.id, name="Корзина").first()
+        if not trash_folder:
+            return jsonify({"error": "Папка Корзина не найдена"}), 404
+        
+        # Перемещаем запись в корзину
+        record.id_folder = trash_folder.id
+        record.trash = 1  # Помечаем как удаленную
+        db.session.commit()
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+# API для постоянного удаления записи
+@app.route("/api/records/<int:record_id>/delete", methods=["DELETE"])
+@login_required
+def delete_record(record_id):
+    try:
+        record = Record.query.get_or_404(record_id)
+        
+        # Проверка доступа
+        if record.user_id != current_user.id:
+            return jsonify({"error": "Доступ запрещен"}), 403
+        
+        # Проверяем, находится ли запись в корзине
+        trash_folder = Folder.query.filter_by(user_id=current_user.id, name="Корзина").first()
+        if not trash_folder or record.id_folder != trash_folder.id:
+            return jsonify({"error": "Запись должна быть в корзине для полного удаления"}), 400
+        
+        # Удаляем файл записи
+        audio_path = os.path.join(app.config['UPLOAD_FOLDER'], record.audio_file)
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+        
+        # Удаляем запись (связанные ошибки удалятся автоматически благодаря cascade="all, delete-orphan")
+        db.session.delete(record)
+        db.session.commit()
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 # Запуск приложения
 if __name__ == "__main__":

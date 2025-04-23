@@ -15,8 +15,14 @@
     {% include "partials/menu.html" %}
     
     <div class="main-content" id="playback-page">
-        <h1>Воспроизведение</h1>
-        <div id="playback-timer">00:00 / 00:00</div>
+        <div class="header-container">
+            <h1>{{ record_name }}</h1>
+            <button id="copy-link-btn" class="copy-link-btn blue-button">
+                <i class="fas fa-link"></i>
+                Копировать ссылку
+            </button>
+        </div>
+        <div id="playback-timer">00:00 <span class="playback-timer-all">/ 00:00</span></div>
 
         <div class="player-section">
             <div id="playback-visualizer">
@@ -25,7 +31,7 @@
             </div>
             <div id="checkpoints-container">
                 <div class="checkpoints-header">
-                    <span>Отметки ошибок</span>
+                    <span>Нет ошибок</span>
                 </div>
                 <div id="checkpoints-list"></div>
             </div>
@@ -38,9 +44,36 @@
             {% endif %}
         </div>
     </div>
+    
+    <!-- Notification element -->
+    <div id="notification" class="notification">Ссылка скопирована</div>
+    
     <script>
         // Передаем информацию о владельце в JavaScript
-        window.isOwner = {{ 'true' if is_owner else 'false' }};
+        window.isOwner = {% if is_owner %}true{% else %}false{% endif %};
+        
+        // Функционал копирования ссылки
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyLinkBtn = document.getElementById('copy-link-btn');
+            const notification = document.getElementById('notification');
+            
+            copyLinkBtn.addEventListener('click', function() {
+                // Копируем текущий URL в буфер обмена
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => {
+                        // Показываем уведомление
+                        notification.style.display = 'block';
+                        // Скрываем уведомление через 2.5 секунды
+                        setTimeout(() => {
+                            notification.style.display = 'none';
+                        }, 2500);
+                    })
+                    .catch(err => {
+                        console.error('Ошибка при копировании ссылки: ', err);
+                        alert('Не удалось скопировать ссылку. Попробуйте еще раз.');
+                    });
+            });
+        });
     </script>
     <script src="../static/js/audio.js"></script>
 </body>

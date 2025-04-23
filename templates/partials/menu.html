@@ -44,7 +44,7 @@
             </li>
 
             <li>
-                <a><i class="fa-regular fa-folder"></i>Папки</a>
+                <a href="/folders"><i class="fa-regular fa-folder"></i> Папки</a>
                 <ul class="sub-menu">
                     {% for folder in current_user.folders %}
                         {% if folder.name != 'Черновики' and folder.name != 'Корзина' %}

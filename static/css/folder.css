@@ -62,6 +62,9 @@
 
 .record-item {
     width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .record-link {
@@ -69,6 +72,113 @@
     color: inherit;
     display: block;
     width: 100%;
+}
+
+.record-actions {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.record-action {
+    color: #666;
+    background-color: #f0f0f0;
+    opacity: 0.2;
+    padding: 6px;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.record-item:hover .record-action {
+    opacity: 1;
+}
+
+.edit-record {
+    color: #6f6f6f;
+    background-color: #e7e7e7;
+}
+
+.delete-record {
+    color: #6f6f6f;
+    background-color: #e7e7e7;
+}
+
+.edit-record:hover {
+    color: #0066cc;
+    background-color: #cce0ff;
+}
+
+.delete-record:hover {
+    color: #bf0909;
+    background-color: #ffb5b5;
+}
+
+.record-edit-form {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    z-index: 10;
+}
+
+.record-edit-form input {
+    width: calc(100% - 18px);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.record-edit-form .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.record-edit-form button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    width: auto;
+    height: auto;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.save-record-name {
+    background-color: #E9F6DE;
+    color: #2F9825;
+}
+
+.save-record-name:hover {
+    background-color: #d8efca;
+}
+
+.cancel-record-edit {
+    background-color: #e7e7e7;
+    color: #6f6f6f;
+}
+
+.cancel-record-edit:hover {
+    background-color: #dadada;
 }
 
 .comment-input__icon {

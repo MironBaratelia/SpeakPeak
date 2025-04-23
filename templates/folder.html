@@ -24,15 +24,19 @@
                         <div class="students-info__error-list">
                             {% for record in records_by_date[date] %}
                                 <div class="record-item">
-                                    <a href="/playback/{{ record.id }}" class="record-link ">
+                                    <a href="/playback/{{ record.id }}" class="record-link">
                                         <label class="comment-input__wrap button">
-                                            <span class="record-name">{{ record.name }}</span>
+                                            <span class="record-name" data-record-id="{{ record.id }}">{{ record.name }}</span>
                                             <svg class="comment-input__icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                                                  viewBox="0 0 18 18" fill="none">
                                                 <path d="M8 4L12 9L8 14" stroke="#DDDDDD" stroke-width="2"/>
                                             </svg>
                                         </label>
                                     </a>
+                                    <div class="record-actions">
+                                        <i class="fas fa-edit record-action edit-record" data-record-id="{{ record.id }}"></i>
+                                        <i class="fas fa-trash record-action delete-record" data-record-id="{{ record.id }}" data-is-trash="{{ 'true' if folder.name == 'Корзина' else 'false' }}"></i>
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>
@@ -42,21 +46,6 @@
         </div>
     </div>
 
-    <script>
-        // Функция для удаления записи
-        function deleteRecord(recordId) {
-            if (confirm("Вы уверены, что хотите удалить эту запись?")) {
-                fetch(`/delete_record/${recordId}`, {
-                    method: 'DELETE',
-                }).then(response => {
-                    if (response.ok) {
-                        window.location.reload(); // Перезагрузить страницу после удаления
-                    } else {
-                        alert("Ошибка при удалении записи.");
-                    }
-                });
-            }
-        }
-    </script>
+    <script src="../static/js/record-management.js"></script>
 </body>
 </html>
